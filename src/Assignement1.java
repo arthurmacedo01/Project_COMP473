@@ -1,7 +1,11 @@
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.File;
+import java.io.FileWriter;
+
 
 import matrix.Matrix;
+import matrix.Features;
 
 // Assignement 1 COMP473
 //Author : Yoann ROBIN
@@ -76,21 +80,67 @@ public class Assignement1 {
 		
 		System.out.println("Pattern 3 (normalization, slant correction and contour) :");//Display of M3nsc
 		System.out.println(M3nsc);*/
-		String file = "src\\Images\\5\\5-09.jpg";//if you have an error like width =-1 your file was not found
-		Image image = Toolkit.getDefaultToolkit().createImage(file);
-		Matrix m = new Matrix(image);
-		m = m.invert();
+			
+try{
+					
+			File writer = new File("src\\Feature.arff");
+			FileWriter out = new FileWriter(writer);
+			String file = null;
+			Matrix m;
+			Features f = new Features();
+
+			
+			int hnormalize = 30;//Height of the normalized matrices
+			int wnormalize = 30;//Width of the normalized matrices
+			for(int i =0;i<=9;i++)
+			{
+				for(int j=1;j<=100;j++)
+				{
+					if(j>=0 && j <=9)
+					{
+						file = "src\\Images\\"+i+"\\"+i+"-"+"0"+j+".jpg";
+					}
+					else
+						file = "src\\Images\\"+i+"\\"+i+"-"+j+".jpg";
+					
+					Image image = Toolkit.getDefaultToolkit().createImage(file);
+					m = new Matrix(image);
+					m = m.invert();
+					System.out.println(file);
+					//Normalization
+					
+					Matrix M1n = m.normalize(hnormalize, wnormalize);//normalization of M1
+					
+					//System.out.println(M1n);
+					
+					f.add(M1n.CrossingFeatureExtraction());
+					
+				}
+			}
+			
+			f.normalization();
+			
+			for (int i=0;i<f.getN_item();i++){
+				for(int k =0;k<f.getColumns();k++)
+				{
+					
+					out.write(f.getElement(i, k)+",");
+					
+				}
+				out.write("label"+((int)i/100));
+				out.write("\n");	
+			}
+			
+			
+			out.close();
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex.getMessage());
+		}
+
 		
-		//Normalization
-		int hnormalize = 30;//Height of the normalized matrices
-		int wnormalize = 30;//Width of the normalized matrices
-		Matrix M1n = m.normalize(hnormalize, wnormalize);//normalization of M1
-		System.out.println(M1n);
-		
-		M1n = M1n.invert();
-		M1n.Skeletonize();
-		
-		System.out.println(M1n);
+	
 	}
 	
 }

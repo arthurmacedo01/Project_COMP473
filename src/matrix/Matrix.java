@@ -650,29 +650,29 @@ public class Matrix {
 		gradientVector = new float[5][5][16]; //the image is divided 25 parts (5 columns and 5 rows). Each part has 16 features.
 		feature_vector = new float[5*5*16];
 		
-				for(int i = 1; i < rows-1; ++i)
-				{
-				    for(int j = 1; j < columns-1; ++j)
-				    {
-				    	gx=(a[i+1][j+1]+2*a[i][j+1]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i][j-1]+a[i-1][j-1]);
-				    	gy=(a[i-1][j-1]+2*a[i-1][j]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i+1][j]+a[i+1][j+1]);
-				    	angle=Math.atan2(gy, gx); //degrees from -pi to pi
+		for(int i = 1; i < rows-1; ++i)
+		{
+		    for(int j = 1; j < columns-1; ++j)
+		    {
+		    	gx=(a[i+1][j+1]+2*a[i][j+1]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i][j-1]+a[i-1][j-1]);
+		    	gy=(a[i-1][j-1]+2*a[i-1][j]+a[i-1][j+1])-(a[i+1][j-1]+2*a[i+1][j]+a[i+1][j+1]);
+		    	angle=Math.atan2(gy, gx); //degrees from -pi to pi
 
-				    	angle_index=(int) (angle/(2*Math.PI/16)); //int from -8 to 8
-				    	angle_index+=8;//int from 0 to 16
+		    	angle_index=(int) (angle/(2*Math.PI/16)); //int from -8 to 8
+			 	angle_index+=8;//int from 0 to 16
+			    	
+			   	if(angle_index==16)
+			   		angle_index=15;//int from 0 to 15
 				    	
-				    	if(angle_index==16)
-				    		angle_index=15;//int from 0 to 15
-				    	
-				    	gx=Math.pow(gx, 2);
-				    	gy=Math.pow(gy, 2);
-				    	g=Math.sqrt(gx+gy);
+			   	gx=Math.pow(gx, 2);
+			   	gy=Math.pow(gy, 2);
+			   	g=Math.sqrt(gx+gy);
 				    	
 
-						gradientVector[(int)(i/(rows/5))][(int)(j/(columns/5))][angle_index]+=g;
+				gradientVector[(int)(i/(rows/5))][(int)(j/(columns/5))][angle_index]+=g;
 
-				    }
-				}	    	
+		    }
+		}	    	
 				
 				
 /*				
@@ -691,57 +691,69 @@ public class Matrix {
 				}
 				System.out.println(stack);
 */				
-				for(int i = 0; i < 5; ++i)
-				    for(int j = 0; j < 5; ++j)
-				    	for(int k=0;k<16;k++)
-				    		feature_vector[i*5*16+j*16+k] = gradientVector[i][j][k];
+		for(int i = 0; i < 5; ++i)
+		    for(int j = 0; j < 5; ++j)
+		    	for(int k=0;k<16;k++)
+		    		feature_vector[i*5*16+j*16+k] = gradientVector[i][j][k];
 				    	
 
-				return feature_vector;
+		return feature_vector;
 				
 	}
-
 	
-	public Vector<int[]> ProjectionHistograms() {
+	public float[] ProjectionHistograms() {
 		// Horizontal Histogram
+		float[] featureVector = new float[rows+columns];
+		
 		int[] m_HorizontalFeatureVector = new int[rows];
 		int[] m_VerticalFeatureVector = new int[columns];
 		for (int i = 0; i < rows; i++) {
 			int count = 0;
 			for (int j = 0; j < columns; j++) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					count++;
 				}
 
 			}
 			m_HorizontalFeatureVector[i] = count;
+			 
 		}
 		// Vertical Histogram
 		for (int j = 0; j < columns; j++) {
 			int count = 0;
 			for (int i = 0; i < rows; i++) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					count++;
 				}
 
 			}
 			m_VerticalFeatureVector[j] = count;
 		}
+		
+		for(int i = 0; i < m_HorizontalFeatureVector.length; i++){
+			featureVector[i] = m_HorizontalFeatureVector[i];
+		}
 
-		Vector<int[]> objNewVector = new Vector<int[]>();
-		objNewVector.add(m_HorizontalFeatureVector);
-		objNewVector.add(m_VerticalFeatureVector);
-		return objNewVector;
-	}	
+	    //Copy elements from second array into last part of new array
+		for(int j = m_HorizontalFeatureVector.length;j < featureVector.length;j++){
+			featureVector[j] = m_VerticalFeatureVector[j-m_HorizontalFeatureVector.length];
+		}
+
+		
+		return featureVector;		
+	}
 	
-	public Vector<int[]> CrossingFeatureExtraction() {
+	public float[] CrossingFeatureExtraction() {
 		int[] m_HorizontalFeatureVector = new int[rows];
 		int[] m_VerticalFeatureVector = new int[columns];
+		float[] featureVector = new float[rows+columns];
+
+		
 		for (int i = 0; i < rows; i++) {
 			int count = 0;
 			for (int j = 0; j < columns; j++) {
 				if (j != 0) {
-					if (a[i][j - 1] == 1 && a[i][j] == 0) {
+					if (a[i][j - 1] == 0 && a[i][j] == 1) {
 						count++;
 					}
 				}
@@ -753,7 +765,7 @@ public class Matrix {
 			int count = 0;
 			for (int i = 0; i < rows; i++) {
 				if (i != 0) {
-					if (a[i - 1][j] == 1 && a[i][j] == 0) {
+					if (a[i - 1][j] == 0 && a[i][j] == 1) {
 						count++;
 					}
 				}
@@ -761,19 +773,24 @@ public class Matrix {
 			}
 			m_VerticalFeatureVector[j] = count;
 		}
+		
+		for(int i = 0; i < m_HorizontalFeatureVector.length; i++){
+			featureVector[i] = m_HorizontalFeatureVector[i];
+		}
 
-		Vector<int[]> objNewVector = new Vector<int[]>();
-		objNewVector.add(m_HorizontalFeatureVector);
-		objNewVector.add(m_VerticalFeatureVector);
-		return objNewVector;
+	    //Copy elements from second array into last part of new array
+		for(int j = m_HorizontalFeatureVector.length;j < featureVector.length;j++){
+			featureVector[j] = m_VerticalFeatureVector[j-m_HorizontalFeatureVector.length];
+		}
+
+		return featureVector;
 	}
 	
 	public Vector<int[]> DistancesFeatureExtraction() {
 		int[] leftList = new int[rows];
 		for (int i = 0; i < rows; i++) {
-
 			for (int j = 0; j < columns; j++) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					leftList[i] = j;
 					break;
 
@@ -785,9 +802,8 @@ public class Matrix {
 		int[] upList = new int[columns];
 
 		for (int j = 0; j < columns; j++) {
-
 			for (int i = 0; i < rows; i++) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					upList[j] = i;
 					break;
 
@@ -799,7 +815,7 @@ public class Matrix {
 		int[] rightList = new int[rows];
 		for (int i = 0; i < rows; i++) {
 			for (int j = columns - 1; j >= 0; j--) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					rightList[i] = j;
 					break;
 
@@ -811,7 +827,7 @@ public class Matrix {
 		int[] downList = new int[columns];
 		for (int j = 0; j < columns; j++) {
 			for (int i = rows - 1; i >= 0; i--) {
-				if (a[i][j] == 0) {
+				if (a[i][j] == 1) {
 					downList[j] = i;
 					break;
 
