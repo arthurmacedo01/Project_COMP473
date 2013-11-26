@@ -6,6 +6,8 @@ import java.io.FileWriter;
 
 import matrix.Matrix;
 import matrix.Features;
+import matrix.ZonedDistanceFeatureExtractor;
+
 
 // Assignement 1 COMP473
 //Author : Yoann ROBIN
@@ -20,67 +22,13 @@ public class Assignement1 {
 		
 		/*//Original patterns
 		Matrix M1 = new Matrix("..\\Pattern1.txt");//loading of the first pattern from its txt file
-		Matrix M2 = new Matrix("..\\Pattern2.txt");//loading of the second pattern from its txt file
-		Matrix M3 = new Matrix("..\\Pattern3.txt");//loading of the third pattern from its txt file
-		M1 = M1.invert();
-		M2 = M2.invert();
 		M3 = M3.invert();
-		
-		System.out.println("Pattern 1 (original) :");//Display of M1
-		System.out.println(M1);
-		
-		System.out.println("Pattern 2 (original) :");//Display of M2
-		System.out.println(M2);
-
-		System.out.println("Pattern 3 (original) :");//Display of M3
-		System.out.println(M3);
-		
-		//Normalization
 		int hnormalize = 30;//Height of the normalized matrices
 		int wnormalize = 30;//Width of the normalized matrices
 		Matrix M1n = M1.normalize(hnormalize, wnormalize);//normalization of M1
-		Matrix M2n = M2.normalize(hnormalize, wnormalize);//normalization of M2
-		Matrix M3n = M3.normalize(hnormalize, wnormalize);//normalization of M3
-		
-		System.out.println("Pattern 1 (normalized) :");//Display of M1 normalized
-		System.out.println(M1n);
-		
-		System.out.println("Pattern 2 (normalized) :");//Display of M2 normalized
-		System.out.println(M2n);
-		
-		System.out.println("Pattern 3 (normalized) :");//Display of M3 normalized
-		System.out.println(M3n);
-		
-		
-		//Slant Correction
 		Matrix M1ns = M1n.correctSlant();//slant correction of M1n
-		Matrix M2ns = M2n.correctSlant();//slant correction of M2n
-		Matrix M3ns = M3n.correctSlant();//slant correction of M3n
-		
-		System.out.println("Pattern 1 (normalized and with slant correction) :");//Display of M1ns
-		System.out.println(M1ns);
-		
-		System.out.println("Pattern 2 (normalized and with slant correction) :");//Display of M2ns
-		System.out.println(M2ns);
-		
-		System.out.println("Pattern 3 (normalized and with slant correction) :");//Display of M3ns
-		System.out.println(M3ns);
-		
-		
-		//Contour
 		Matrix M1nsc = M1ns.getContour();//contour of M1ns
-		Matrix M2nsc = M2ns.getContour();//contour of M2ns
-		Matrix M3nsc = M3ns.getContour();//contour of M3ns
-		
-		System.out.println("Pattern 1 (normalization, slant correction and contour) :");//Display of M1nsc
-		System.out.println(M1nsc);
-		
-		System.out.println("Pattern 2 (normalization, slant correction and contour) :");//Display of M2nsc
-		System.out.println(M2nsc);
-		
-		System.out.println("Pattern 3 (normalization, slant correction and contour) :");//Display of M3nsc
-		System.out.println(M3nsc);*/
-			
+		*/	
 try{
 					
 			File writer = new File("src\\Feature.arff");
@@ -92,9 +40,10 @@ try{
 			
 			int hnormalize = 30;//Height of the normalized matrices
 			int wnormalize = 30;//Width of the normalized matrices
-			for(int i =0;i<=9;i++)
+			
+			for(int j=1;j<=100;j++)
 			{
-				for(int j=1;j<=100;j++)
+				for(int i =0;i<=9;i++)
 				{
 					if(j>=0 && j <=9)
 					{
@@ -111,15 +60,29 @@ try{
 					
 					Matrix M1n = m.normalize(hnormalize, wnormalize);//normalization of M1
 					
-					//System.out.println(M1n);
 					
-					f.add(M1n.CrossingFeatureExtraction());
+					ZonedDistanceFeatureExtractor z = new ZonedDistanceFeatureExtractor(M1n.getArray());
+					z.start();
+					float[] blah = new float[z.features.length];
 					
+					for(int c =0;c<z.features.length;c++)
+						blah[c] = z.features[c];
+					
+					//f.add(zchd(blah,M1n.CrossingFeatureExtraction(),M1n.ProjectionHistograms(),M1n.DistancesFeatureExtraction()));
+					f.add(M1n.gradientVector());
 				}
 			}
 			
 			f.normalization();
 			
+			out.write("@RELATION digits\n");
+			
+			for (int i=0; i < f.getColumns();i++)
+				out.write("@Attribute "+ i + " numeric\n");
+			
+			out.write("@Attribute class {label0,label1,label2,label3,label4,label5,label6,label7,label8,label9}\n");
+			out.write("@DATA\n");
+					
 			for (int i=0;i<f.getN_item();i++){
 				for(int k =0;k<f.getColumns();k++)
 				{
@@ -127,7 +90,7 @@ try{
 					out.write(f.getElement(i, k)+",");
 					
 				}
-				out.write("label"+((int)i/100));
+				out.write("label"+((int)(i%10)));
 				out.write("\n");	
 			}
 			
@@ -142,5 +105,24 @@ try{
 		
 	
 	}
-	
+	public static float[] zchd(float[]z, float[]c, float[]h , float []d){
+		
+		float []output = new float[z.length+c.length+h.length+d.length];
+		int i=0,j=0,k=0,l=0;
+		
+		for (i=0;i<z.length;i++){
+			output[i] = z[i];
+		}
+		for (j=0;j<c.length;j++){
+			output[i+j] = c[j];
+		}
+		for (k=0;k<h.length;k++){
+			output[i+j+k] = h[k];		
+		}
+		for (l=0;l<d.length;l++){
+			output[i+j+k+l] = d[l];		
+		}
+		
+		return output;
+	}
 }

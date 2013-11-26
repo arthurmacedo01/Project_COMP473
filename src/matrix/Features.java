@@ -29,14 +29,14 @@ public class Features {
 		
 	}
 	
-	public void add(float[] in)throws Exception{
+	public void add(float[] features)throws Exception{
 		if(columns==-1)
-			columns=in.length;
+			columns=features.length;
 		
-		if (!(columns==in.length)){
+		if (!(columns==features.length)){
 			throw new Exception("Size Error");
 		}else{
-			this.table.add(in);
+			this.table.add(features);
 			this.n_item++;			
 		}
 	}

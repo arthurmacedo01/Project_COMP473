@@ -30,6 +30,10 @@ public class Matrix {
 		return this.columns;
 	}
 	
+	public int[][] getArray(){
+		return this.a;
+	}
+	
 	//initialize a matrix from a 2D array and its number of rows and columns
 	public Matrix(int[][] in, int rows, int columns){
 		a=in;
@@ -786,7 +790,7 @@ public class Matrix {
 		return featureVector;
 	}
 	
-	public Vector<int[]> DistancesFeatureExtraction() {
+	public float[] DistancesFeatureExtraction() {
 		int[] leftList = new int[rows];
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < columns; j++) {
@@ -835,12 +839,32 @@ public class Matrix {
 			}
 
 		}
-		Vector<int[]> objNewVector = new Vector<int[]>();
-		objNewVector.add(leftList);
-		objNewVector.add(upList);
-		objNewVector.add(rightList);
-		objNewVector.add(downList);
-		return objNewVector;
+		
+		float [] output = new float[leftList.length+upList.length+rightList.length+downList.length];
+		
+		for(int i = 0 ;i<leftList.length;i++)
+		 output[i]=leftList[i];
+		for(int i = 0;i<upList.length;i++)
+			 output[i+upList.length]=upList[i];
+		for(int i = 0;i<rightList.length;i++)
+			 output[i+upList.length+rightList.length]=rightList[i];
+		for(int i = 0;i<downList.length;i++)
+			 output[i+upList.length+rightList.length+downList.length]=downList[i];
+
+		return output;
 	}
+	
+	public float[] getImage(){
+		float []output = new float[this.getColumns()*this.getRows()];
+		int k=0;
+		for (int i=0;i<this.getColumns();i++){
+			for(int j=0;j<this.getRows();j++){
+				output[k] = a[i][j];
+				k++;
+			}
+		}
+		return output;
+	}
+	
 
 }
