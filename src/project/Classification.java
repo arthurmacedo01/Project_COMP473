@@ -32,17 +32,19 @@ public class Classification {
     	int n_features_methods = feature_Extraction.n_features_methods;
     	//int n_features_methods = 6;
     	
-    	feature_Extraction.run();
+    	//feature_Extraction.run();
     	
          // Create an training set from file
          DataSource source;
          Instances data;
          Random r;
+         long startTime;
+         long endTime;
          
         for (int k=0;k<n_features_methods;k++){
         	 source = new DataSource("src\\Feature"+k+".arff");	        
         	 data = source.getDataSet();
-        	 System.out.println("=====================\nFeature Extration "+feature_Extraction.feature_name[k]+"\n---------------------\n");
+        	 System.out.println("===========================\nFeature Extration "+feature_Extraction.feature_name[k]+"\n---------------------------\n");
 	          
 	         // Set class index
 	         if (data.classIndex() == -1)
@@ -66,6 +68,7 @@ public class Classification {
 	        							};
 			
 	         
+	        startTime=System.currentTimeMillis();
 	         // Run for each classifier model
 	         for(int j = 0; j < models.length; j++) {
 	
@@ -92,10 +95,12 @@ public class Classification {
 	                 }
 	                 */
 	             }
+	             endTime=System.currentTimeMillis();	             
 	             // Calculate overall accuracy of current classifier on all splits
 	             double accuracy = calculateAccuracy(predictions);
 	             // Print current classifier's name and accuracy in a complicated, but nice-looking way.
-	             System.out.println(models[j].getClass().getSimpleName() + ": " + String.format("%.2f%%", accuracy));	
+	             System.out.print(models[j].getClass().getSimpleName() + ": " + String.format("%.2f%%", accuracy));	
+	             System.out.println(" - running time: "+((endTime-startTime)/1000)+" seconds.");
 	         }
         }
     }
