@@ -58,10 +58,9 @@ public class Matrix {
 		    	int green = (rgb >>  8) & 0xFF;
 		    	int blue =  (rgb      ) & 0xFF;
 		        a[j][k] = (int) (0.2126*red + 0.7152*green + 0.0722*blue);
-		        s += a[j][k];
 		    }
 		}
-		this.toBinaryImage(s/nbElements);
+		
 	}
 	
 	
@@ -82,8 +81,19 @@ public class Matrix {
 	    return bufferedImage;
 	}
 	
+	public int threshold(){
+		int s=0;
+		int nbElements = rows*columns;
+		
+		for (int j = 0; j < rows; j++) {
+		    for (int k = 0; k < columns; k++) {
+		        s += a[j][k];
+		    }
+		}
+		return s/nbElements;
+	}
 	
-	private void toBinaryImage(int threshold){
+	public void toBinaryImage(int threshold){
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < columns; j++) {
 				if (a[i][j]>threshold){
@@ -135,6 +145,14 @@ public class Matrix {
 		input.close();
 	}
 	
+	public Matrix clone(){
+		Matrix Clone = new Matrix(this.getArray(),this.getRows(),this.getColumns());		
+		return Clone;
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//					PREPROCESSING 							//////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	
 	//return the moment mpq
 	public double moment(int p, int q){
@@ -159,7 +177,7 @@ public class Matrix {
 		double xc = m10/m00;
 		double yc = m01/m00;
 		for(int i = 0; i < rows; ++i)
-		{
+		{	
 		    for(int j = 0; j < columns; ++j)
 		    {
 		        stack = stack + (double) Math.pow(i - xc, p) * (double) Math.pow(j - yc, q) * a[i][j];
@@ -174,26 +192,26 @@ public class Matrix {
 		return(Math.toDegrees(Math.atan(-this.centralMoment(1, 1)/this.centralMoment(0, 2))));
 	}
 	
-	public Matrix invert(){
+	public void invert(int maxValue){
 		
 		int[][] Mfin = new int[rows][columns];
 		for(int i = 0; i < rows; ++i)
 		{
 		    for(int j = 0; j < columns; ++j)
 		    {
-		    		Mfin[i][j] = 1-a[i][j] ;
+		    		Mfin[i][j] = maxValue-a[i][j] ;
 		    }
 		}
-
-		Matrix Mresult = new Matrix(Mfin, rows, columns);
-		return Mresult;
+		a = Mfin;
 }
 	
 	
 	//return the matrix with slant correction
-	public Matrix correctSlant(){
+	public void correctSlant(){
 			double m01 = this.moment(0, 1);
 			double m00 = this.moment(0, 0);
+			int yp;
+			int xp;
 			
 			double yc = m01/m00;
 			int[][] Mfin = new int[rows][columns];
@@ -209,8 +227,8 @@ public class Matrix {
 			{
 			    for(int j = 0; j < columns; ++j)
 			    {
-			    	int yp = i;
-			    	int xp = (int) (j + (i - yc)*(-centralMoment(1, 1)/centralMoment(0, 2)));
+			    	yp = i;
+			    	xp = (int) (j + (i - yc)*(-centralMoment(1, 1)/centralMoment(0, 2)));
 			    	
 			    	try{
 			    		Mfin[yp][xp] = a[i][j];
@@ -218,8 +236,7 @@ public class Matrix {
 			    	catch (Exception e){}
 			    }
 			}
-			Matrix Mresult = new Matrix(Mfin, rows, columns);
-			return Mresult;
+			a = Mfin;
 	}
 	
 	
@@ -284,7 +301,7 @@ public class Matrix {
 	}
 	
 	//return a normalized matrix of size hnew * wnew
-	public Matrix normalize(int hnew, int wnew){
+	public void normalize(int hnew, int wnew){
 		int h1 = getNorth();
 		int h2 = getSouth();
 		int w1 = getWest();
@@ -315,13 +332,14 @@ public class Matrix {
 		    	catch (Exception e){}
 		    }
 		}
-		Matrix Mresult = new Matrix(Mfin,hnew, wnew);
-		return Mresult;
+		a = Mfin;
+		rows = hnew;
+		columns = wnew;
 	}
 	
 	
 	//return a matrix containing the contours of the original matrix
-	public Matrix getContour(){
+	public void getContour(){
 			
 			int[][] Mfin = new int[rows][columns];
 			for(int i = 0; i < rows; ++i)
@@ -376,7 +394,7 @@ public class Matrix {
 			
 			
 			Matrix Mresult = new Matrix(Mfin,rows, columns);
-			return Mresult.invert();
+			Mresult.invert(1);
 		}
 	
 	
@@ -401,7 +419,7 @@ public class Matrix {
 	}
 	
 		//return a matrix after applying smoothing (gaussian filter) on GREYSCALE images
-	public Matrix smoothing(){
+	public void smoothing(){
 	
 		int[][] Mfin = new int[rows][columns];
 		int mask,mask_factor;
@@ -443,13 +461,11 @@ public class Matrix {
 
 		}
 		
-		Matrix Mresult = new Matrix(Mfin, rows, columns);
-	
-		return Mresult;				
+		a = Mfin;					
 	}
 
 	//return a matrix after applying filling on BINARY images
-	public Matrix filling(){
+	public void filling(){
 		
 		int[][] Mfin = new int[rows][columns];
 		for(int i = 1; i < rows-1; ++i)
@@ -476,12 +492,11 @@ public class Matrix {
 
 		}		
 		
-		Matrix Mresult = new Matrix(Mfin, rows, columns);
-		return Mresult;
+		a = Mfin;		
 	}
 
 	//return a matrix after applying thinning on BINARY images	
-	public Matrix thinning(){
+	public void thinning(){
 		
 		int[][] Mfin = new int[rows][columns];
 		for(int i = 1; i < rows-1; ++i)
@@ -508,9 +523,11 @@ public class Matrix {
 
 		}		
 		
-		Matrix Mresult = new Matrix(Mfin, rows, columns);
-		return Mresult;
+		a = Mfin;
 	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//						FEATURE EXTRATION					/////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public void Skeletonize()
     {
