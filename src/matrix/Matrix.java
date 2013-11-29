@@ -6,8 +6,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Scanner;
-import java.util.Vector;
-
 import javax.swing.ImageIcon;
 
 //Author : Yoann ROBIN
@@ -247,7 +245,7 @@ public class Matrix {
 		{
 		    for(int j = 0; j < columns; ++j)
 		    {
-		    	if (this.a[i][j] == 0){
+		    	if (this.a[i][j] == 1){
 		    		result = i;
 		    	}
 		    }
@@ -262,7 +260,7 @@ public class Matrix {
 		{
 		    for(int j = columns-1; j >= 0; --j)
 		    {
-		    	if (this.a[i][j] == 0){
+		    	if (this.a[i][j] == 1){
 		    		result = i;
 		    	}
 		    }
@@ -277,7 +275,7 @@ public class Matrix {
 		{
 			for(int i = 0; i < rows; ++i)
 			{
-		    	if (this.a[i][j] == 0){
+		    	if (this.a[i][j] == 1){
 		    		result = j;
 		    	}
 		    }
@@ -292,7 +290,7 @@ public class Matrix {
 		{
 			for(int i = rows-1; i >= 0; --i)
 			{
-		    	if (this.a[i][j] == 0){
+		    	if (this.a[i][j] == 1){
 		    		result = j;
 		    	}
 		    }
@@ -306,28 +304,31 @@ public class Matrix {
 		int h2 = getSouth();
 		int w1 = getWest();
 		int w2 = getEast();
-		int hold = h2 - h1;
-		int wold = w2 - w1;
+		int hold = h2 - h1 + 1;
+		int wold = w2 - w1 + 1;
+		
+		/*
+		double m10 = this.moment(1, 0);
+		double m01 = this.moment(0, 1);
+		double m00 = this.moment(0, 0);
+		
+		double yc = m10/m00;
+		double xc = m01/m00;
+		*/
 		
 		double alpha = (double)wnew/(double)wold;
 		double beta = (double)hnew/(double)hold;
 		
+		
 		int[][] Mfin = new int[hnew][wnew];
-		for(int i = 0; i < hnew; ++i)
-		{
-		    for(int j = 0; j < wnew; ++j)
-		    {
-		        Mfin[i][j] = 1;
-		    }
-		}
-		
-		
+
 		for(int i = 0; i < hnew; ++i)
 		{
 		    for(int j = 0; j < wnew; ++j)
 		    {
 		    	try{
-		    		Mfin[i][j] = a[(int)(i/beta)][(int)(j/alpha)];
+		    		//Mfin[i][j] = a[(int)((i-hnew/2)/beta+yc)][(int)((j-wnew/2)/alpha+xc)];
+		    		Mfin[i][j] = a[(int)((i+1)/beta-1+h1)][(int)((j+1)/alpha-1+w1)];
 		    	}
 		    	catch (Exception e){}
 		    }

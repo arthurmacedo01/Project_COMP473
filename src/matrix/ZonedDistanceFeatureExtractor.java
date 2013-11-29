@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class ZonedDistanceFeatureExtractor {
 
+	int div = 10;
 	int[][] arr;
 	int rows;
 	int cols;
@@ -64,11 +65,11 @@ public class ZonedDistanceFeatureExtractor {
 	// converting into 9 zones
 	public void makeZones(){
 	
-		int r = rows/3;
-		int c = cols/3;
+		int r = rows/div;
+		int c = cols/div;
 		
-		for(int rowM = 0; rowM<3; rowM++){
-			for(int colM=0; colM<3; colM++){
+		for(int rowM = 0; rowM<div; rowM++){
+			for(int colM=0; colM<div; colM++){
 				makeZone(rowM*r, colM*c, r, c);
 			}
 		}

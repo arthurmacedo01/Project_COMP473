@@ -10,6 +10,7 @@ public class Features {
 	private int n_item=0;
 	private int columns=-1;	
 	Vector<float[]> table = new Vector<float[]>();
+	public String label = "0";
 		
 	//return the number of rows in the table
 	public int getColumns(){
@@ -24,6 +25,8 @@ public class Features {
 	public int getN_item(){
 		return this.n_item;
 	}
+	
+	
 	
 	public Features(){
 		

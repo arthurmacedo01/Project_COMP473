@@ -11,13 +11,6 @@ import matrix.Features;
 import matrix.ZonedDistanceFeatureExtractor;
 
 
-// Assignement 1 COMP473
-//Author : Yoann ROBIN
-//IDStudent : 7118538
-
-
-//Main class
-
 public class Feature_Extraction{
 
 	int n_features_methods = 5;
@@ -70,6 +63,10 @@ public class Feature_Extraction{
 						M1.toBinaryImage(M1.threshold());
 						M1.thinning();
 						M1.filling();
+						//int[][] temp = TestData_Feature_Extraction.trimWhiteColumns(M1.getArray());
+						//temp = TestData_Feature_Extraction.trimWhiteRows(temp);
+						//M1 = new Matrix(temp, temp.length, temp[0].length);
+						
 						//M1.correctSlant();
 						M1.normalize(hnormalize, wnormalize);
 						//System.out.println(M1);
